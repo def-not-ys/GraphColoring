@@ -2,8 +2,6 @@ class Vertex {
     constructor (val) {
         this._val = val;
         this._color = null;
-
-        console.log("created vertex!");
     }
 
     set val(v) {
@@ -26,44 +24,77 @@ class Vertex {
 class Graph {
 
     constructor() {
-        this._adjList = {};
+        this._adjList = [];
+    }
 
-        console.log("created graph!");
+    get adjList() {
+        return this._adjList;
     }
 
     addVertex(vertex) {
-        if (!this._adjList[vertex]) {
-            this._adjList[vertex] = [];
+        if (this.findVertexByVal(vertex.val) < 0) {
+            this._adjList.push({
+                key: vertex, 
+                value: []
+            });
         }
     }
 
     addEdge(src, dest) {
-        if (!this._adjList[src]) {
+
+        var srcKey = this.findVertexByVal(src.val);
+        var destKey = this.findVertexByVal(dest.val);
+
+        if (srcKey < 0) {
             this.addVertex(src);
+            console.log("source vertex", src.val, "not found");
         }
-        if (!this._adjList[dest]) {
+        if (destKey < 0) {
             this.addVertex(dest);
+            console.log("dest vertex", dest.val, "not found")
         }
 
-        this._adjList[src].push(dest);
-        this._adjList[dest].push(src);
+        this._adjList[srcKey].value.push(dest);
+        this._adjList[destKey].value.push(src);
+
+        console.log("added edge ", src.val, " to ",  dest.val);
     }
 
     removeEdge(src, dest) {
-        this._adjList[src] = this._adjList[src].filter(v => v !== dest);
-        this._adjList[dest] = this._adjList[dest].filter(v => v !== src);
+        // stub 
     }
 
     removeVertex(vertex) {
-        while(this._adjList[vertex]) {
-            const adjacentVertex = this._adjList[vertex].pop();
-            this.removeEdge(vertex, adjacentVertex);
-        }
-        delete this._adjList[vertex];
+        // stub 
     }
 
+    // find vertex in the graph by value, returns key in the adjacency list
     findVertexByVal(val) {
-        // find vertex in the graph by value, return vertex
+        for (var key in this._adjList) {
+            // console.log( " key = ", key, ": ", this._adjList[key].value);
+            if (this._adjList[key].key.val === val) {
+                // console.log( "found vertex: ", val);
+                return key;
+            }
+        }
+        return -1;
+    }
+
+    // returns edge list of the given vertex
+    findEdgeByVertex(vertex) {
+        var key = this.findVertexByVal(vertex.val);
+        if (key >= 0) {
+            return this._adjList[key].value;
+        } else {
+            return -1;
+        }
+    }
+
+    // prints graph to console
+    printGraph() {
+        for (var entry in this._adjList) {
+            console.log(this._adjList[entry]);
+        }
     }
 
 }
@@ -95,10 +126,25 @@ function solve(graph) {
 }
 
 g = new Graph();
-for (var i = 0; i < 10; i++) {
+for (var i = 20; i < 30; i++) {
     vertex = new Vertex(i);
     vertex.color = colors.RED;
-    console.log(vertex.val, vertex.color)
-
     g.addVertex(vertex);
+
+    if (i !== i-5) {
+        var key = g.findVertexByVal(i-2);
+        if (key >= 0) {
+            var adjVertexEntry = g._adjList[key];
+            // console.log("vertex",i, " 's adjVertex: ", adjVertexEntry.key.val,  adjVertexEntry.value);
+            g.addEdge(vertex, adjVertexEntry.key)
+
+            if (adjVertexEntry.key.color === vertex.color) {
+                adjVertexEntry.key.color = colors.BLUE;
+            }
+        }
+    }
+    
 }
+
+console.log(g.adjList.length);
+// g.printGraph();
