@@ -41,23 +41,44 @@ class Graph {
     }
 
     addEdge(src, dest) {
+        
+        if (src.val === dest.val) {
+            return; // loopless graph
+        }
 
         var srcKey = this.findVertexByVal(src.val);
         var destKey = this.findVertexByVal(dest.val);
 
-        if (srcKey < 0) {
-            this.addVertex(src);
-            console.log("source vertex", src.val, "not found");
-        }
-        if (destKey < 0) {
-            this.addVertex(dest);
-            console.log("dest vertex", dest.val, "not found")
-        }
+        if (!this.hasEdge(srcKey, destKey, src, dest)) {
 
-        this._adjList[srcKey].value.push(dest);
-        this._adjList[destKey].value.push(src);
+            if (srcKey < 0) {
+                this.addVertex(src);
+                // console.log("source vertex", src.val, "not found");
+            }
+            if (destKey < 0) {
+                this.addVertex(dest);
+                // console.log("dest vertex", dest.val, "not found")
+            }
 
-        console.log("added edge ", src.val, " to ",  dest.val);
+            this._adjList[srcKey].value.push(dest);
+            this._adjList[destKey].value.push(src);
+
+            // console.log("added edge ", src.val, " to ",  dest.val);
+        }
+    }
+
+    hasEdge(srcKey, destKey, src, dest) {
+        if(srcKey >= 0 && destKey >= 0) {
+            var edges = this.findEdgeByVertex(src);
+
+            for (var i = 0; i < edges.length; i++) {
+                var v = edges[i];
+                if (v.val === dest.val) {
+                    return true;
+                }
+            }
+        } 
+        return false;
     }
 
     removeEdge(src, dest) {
@@ -106,17 +127,36 @@ const colors = {
     GREEN: 'green'
 }
 
+// generate random integer in [min, max]
+function randomInteger(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+}
 
-// generate a graph with n random distinct value, no color vertices, returns the graph
+
+// generate a graph with n random distinct value[0, n-1], default color vertices, returns the graph
 function generateGraph(n) {
     graph = new Graph();
 
-    // generate random vertices and add them to graph 
-
+    // generate n vertices and add them to graph 
+    for (var i = 0; i < n; i++) {
+        vertex = new Vertex(i);
+        vertex.color = colors.RED;
+        graph.addVertex(vertex);       
+    }
     // generate edges between vertices and add them to graph 
-    // loopless 
+    for (var entry in graph.adjList) {
+        var d = randomInteger(1, n-1); // connected graph 
 
+        // console.log("degree:", d);
 
+        var vertex = graph.adjList[entry].key;
+        for (var i = 1; i <= d; i++) {
+            var x = randomInteger(0, n-1);
+            var neighbourKey = graph.findVertexByVal(x); // choose a random vertex
+            var neighbour = graph.adjList[neighbourKey].key;
+            graph.addEdge(vertex, neighbour);
+        }
+    }
     return graph;
 }
 
@@ -125,26 +165,11 @@ function solve(graph) {
 
 }
 
-g = new Graph();
-for (var i = 20; i < 30; i++) {
-    vertex = new Vertex(i);
-    vertex.color = colors.RED;
-    g.addVertex(vertex);
 
-    if (i !== i-5) {
-        var key = g.findVertexByVal(i-2);
-        if (key >= 0) {
-            var adjVertexEntry = g._adjList[key];
-            // console.log("vertex",i, " 's adjVertex: ", adjVertexEntry.key.val,  adjVertexEntry.value);
-            g.addEdge(vertex, adjVertexEntry.key)
 
-            if (adjVertexEntry.key.color === vertex.color) {
-                adjVertexEntry.key.color = colors.BLUE;
-            }
-        }
-    }
-    
-}
+var n = 20; 
+g = generateGraph(n);
 
-console.log(g.adjList.length);
-// g.printGraph();
+
+// console.log(g.adjList.length);
+g.printGraph();
