@@ -1,3 +1,5 @@
+const Queue = require('./Queue.js');
+
 class Vertex {
     constructor (val) {
         this._val = val;
@@ -120,32 +122,44 @@ class Graph {
 
 }
 
-const colors = {
-    RED: 'red',
-    YELLOW: 'yellow',
-    BLUE: 'blue',
-    GREEN: 'green'
-}
+// const colors = {
+//     RED: 'red',
+//     YELLOW: 'yellow',
+//     BLUE: 'blue',
+//     GREEN: 'green'
+// }
 
 // generate random integer in [min, max]
 function randomInteger(min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
+// generates a set of colors with d distinct colors
+function generateColors(d, set) {   
+    for (var i = 0; i < d; i++) {
+        set.add(i);
+    }
+}
 
 // generate a graph with n random distinct value[0, n-1], default color vertices, returns the graph
 function generateGraph(n) {
-    graph = new Graph();
+    let graph = new Graph();
+    let maxDegree = 5;
+    let colors = new Set();
+
+    generateColors(maxDegree, colors);
+
+    console.log(colors);
 
     // generate n vertices and add them to graph 
     for (var i = 0; i < n; i++) {
         vertex = new Vertex(i);
-        vertex.color = colors.RED;
+        vertex.color = -1;
         graph.addVertex(vertex);       
     }
     // generate edges between vertices and add them to graph 
     for (var entry in graph.adjList) {
-        var d = randomInteger(1, n-1); // connected graph 
+        var d = randomInteger(1, maxDegree); // connected graph 
 
         // console.log("degree:", d);
 
@@ -154,22 +168,41 @@ function generateGraph(n) {
             var x = randomInteger(0, n-1);
             var neighbourKey = graph.findVertexByVal(x); // choose a random vertex
             var neighbour = graph.adjList[neighbourKey].key;
-            graph.addEdge(vertex, neighbour);
+
+            if (graph.findEdgeByVertex(neighbour).length < maxDegree) {
+                graph.addEdge(vertex, neighbour);
+            }            
+
+            if (graph.findEdgeByVertex(vertex).length >= maxDegree) {
+                break;
+            }
         }
     }
     return graph;
 }
 
-// solve coloring problem in graph, return unsolvable if unsolvable 
-function solve(graph) {
+// solve coloring problem in graph, returns unsolvable if unsolvable 
+function solve(graph) { 
+    
+
+
 
 }
 
 
 
-var n = 20; 
+var n = 10; 
 g = generateGraph(n);
+
+var q = new Queue;
+
+for (var i = 0; i < 5; i++) {
+    q.enqueue(i);
+}
+
+q.printQueue();
+
 
 
 // console.log(g.adjList.length);
-g.printGraph();
+// g.printGraph();
