@@ -134,23 +134,25 @@ function randomInteger(min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
+// get random item from a Set
+function getRandomItem(set) {
+    let items = Array.from(set);
+    return items[Math.floor(Math.random() * items.length)];
+}
+
 // generates a set of colors with d distinct colors
-function generateColors(d, set) {   
+function generateColors(d) {
+    let set = new Set();   
     for (var i = 0; i < d; i++) {
         set.add(i);
     }
+    return set;
 }
 
 // generate a graph with n random distinct value[0, n-1], default color vertices, returns the graph
-function generateGraph(n) {
+function generateGraph(n, maxDegree) {
     let graph = new Graph();
-    let maxDegree = 5;
-    let colors = new Set();
-
-    generateColors(maxDegree, colors);
-
-    console.log(colors);
-
+    
     // generate n vertices and add them to graph 
     for (var i = 0; i < n; i++) {
         vertex = new Vertex(i);
@@ -182,27 +184,48 @@ function generateGraph(n) {
 }
 
 // solve coloring problem in graph, returns unsolvable if unsolvable 
-function solve(graph) { 
-    
+function solve(n, maxDegree) { 
+    // let allColors = generateColors(maxDegree);
+    let graph = generateGraph(n, maxDegree);
 
+    // console.log(colors);
+    // graph.printGraph();    
 
+    let queue = new Queue();
+    var start = graph.adjList[0].key;
+    queue.enqueue(start);
+
+    while (!queue.isEmpty()) {
+        var vertex = queue.dequeue().data;
+        var edges = graph.findEdgeByVertex(vertex);
+        var colors = generateColors(maxDegree);
+
+        // console.log("reset colors: ", colors);
+
+        for (var e in edges) {
+            if (edges[e].color >= 0) {
+                colors.delete(edges[e].color);
+                // console.log("delete neighbouts'color: ", edges[e].color);
+            } else {
+                queue.enqueue(edges[e]);
+            }
+        }
+
+        // console.log("after checking neighbouts'colors: ", colors);
+
+        console.assert(colors.size > 0);
+
+        // const it = colors.values();
+        // console.log(it.next.value);
+
+        console.log(Array.from(colors));
+
+        vertex.color = Array.from(colors)[0];
+                
+    }
+
+    graph.printGraph();
 
 }
 
-
-
-var n = 10; 
-g = generateGraph(n);
-
-var q = new Queue;
-
-for (var i = 0; i < 5; i++) {
-    q.enqueue(i);
-}
-
-q.printQueue();
-
-
-
-// console.log(g.adjList.length);
-// g.printGraph();
+solve(10, 5);
